@@ -1,6 +1,63 @@
+#install.packages('lle')
+#install.packages("Rtsne")
+#install.packages('KRLS')
+
 library(Rtsne)
-install.packages("Rtsne")
+library(lle)
+library(KRLS)
+
 options(rgl.printRglwidget = TRUE)
+
+generateSwissRoll <- function(n) {
+  #inspired by sklearn.datasets.make_swiss_roll function
+  t <- 0.75 * pi * (3 * runif(n))
+  x <- temp * cos(t)
+  y <- 21 * runif(n)
+  z <- temp * sin(t) * sample(c(-1, 1), 1)
+  
+  swissroll <- cbind(x, y, z)
+  
+  noise <- cbind(rnorm(n, 0, 0.05),
+                 rnorm(n, 0, 0.05),
+                 rnorm(n, 0, 0.05))
+  
+  swissroll <- swissroll + noise
+  
+  return(list(swisroll = swissroll, t = temp))
+  
+}
+
+genrateBolloreoRing <- function(n) {
+  
+  t <- seq(0, 2*pi, length.out = n )
+  
+  a <- 1.5
+  b <- 1
+  #first ring
+  x1 <- a * cos(t)
+  y1 <- b * sin(t)
+  z1 <- rep(0, n)
+  
+  #second ring
+  x2 <- b * sin(t) 
+  y2 <- rep(0, n)
+  z2 <- a * cos(t)
+  
+  #third ring
+  x3 <- rep(0, n)
+  y3 <- a * cos(t)
+  z3 <- b * sin(t)
+  
+  x <- c(x1, x2, x3)
+  y <- c(y1, y2, y3)
+  z <- c(z1, z2, z3)
+  
+  X <- cbind(x, y, z)
+  
+  color <- c(rep.int(1,n), rep.int(2,n), rep.int(3,n))
+  
+  return(list(data = X, color = color))
+}
 
 generateAnneaux <- function(n){
   
@@ -17,8 +74,8 @@ generateAnneaux <- function(n){
   return(x)
   
 }
-generateEsphere <- function(n, surface_only = TRUE){
-  r <- 100
+
+generateSphere <- function(n, r, surface_only = TRUE){
   teta <- runif(n, 0, 2*pi)
   phi <- runif(n, 0 , pi)
   
@@ -32,17 +89,47 @@ generateEsphere <- function(n, surface_only = TRUE){
   
   return(cbind(x, y, z))
 }
-plot3d(esphere(1000))
-plot3d(generateAnneaux(1000))
 
-esphere_1000 <- esphere(1000)
+generateintraSphere <- function(n) {
+  #copy paste from course
+  require(pdist)
+  
+  # these sensors where selected randomly
+  sensors <- matrix(ncol = 3, data = 
+                      c(0.026, 0.236, -0.653, 0.310, 0.507, -0.270, -0.466,  -0.140, 0.353, -0.473,
+                        0.241, 0.193, 0.969, 0.094, 0.756, -0.978, -0.574, -0.502, -0.281, 0.993,
+                        0.026, -0.913, -0.700, 0.876, 0.216, -0.739, 0.556, -0.155, 0.431, 0.411))
+  
+  # draw random points in the sphere unit
+  unitsphere <- generateSphere(n, 1, surface_only=FALSE)
+  
+  # We ode each point as the distance to sensors : intrinsic dimension = 3
+  # while extrinsic dimension = 10
+  X <- as.matrix(pdist(unitsphere, sensors))
+  noise <- matrix(rnorm(ncol(X) * nrow(X), sd = .01), ncol = ncol(X))
+  return(X + noise)
+}
+
+
+
+data <- generateSwissRoll(1000)
+swisroll_1000 <- data$swissroll
+t <- data$t 
+X <- genrateBolloreoRing(300)
+sphere_1000 <- generateSphere(1000, 10)
 anneaux_1000 <- generateAnneaux(1000)
+
+plot3d(swissroll[order(t), ], col = rainbow(n), size = 10)
+plot3d(X$data, col = X$color)
+plot3d(sphere_1000)
+plot3d(anneaux_1000)
+
 #--------------------------- LLE -------------------
 
 s <- 2
-best_k <- calc_k(esphere_1000, s, kmin=1, kmax=30, plotres=TRUE,  parallel=TRUE, cpus=4, iLLE=FALSE)
+best_k <- calc_k(anneaux_1000, s, kmin=1, kmax=5, plotres=TRUE,  parallel=TRUE, cpus=4, iLLE=FALSE)
 a <- which.min(unlist(best_k[2]))
-lle_res <- lle(esphere_1000, s, k = 20)
+lle_res <- lle(sphere_1000, s, k = 20)
 plot(lle_res$Y)
 
 
@@ -58,12 +145,12 @@ pca_kernel <- function(X, s, sigma){
   return(A%*%t(vector))
 }
 
-pca_res <- pca_kernel(esphere_1000, s , 1000)
+pca_res <- pca_kernel(sphere_1000, s , 1000)
 plot(pca_res)
 
 #--------------------------- TSNE -------------------
 
-tsne <- Rtsne(esphere_1000, dims = s, perplexity=30, verbose=TRUE, max_iter = 500)
+tsne <- Rtsne(sphere_1000, dims = s, perplexity=30, verbose=TRUE, max_iter = 500)
 plot(tsne$Y, t='n', main="tsne")
 
 
@@ -71,7 +158,7 @@ plot(tsne$Y, t='n', main="tsne")
 
 
 #Get dimension from PCA
-res.pca <- prcomp(esphere_1000)
+res.pca <- prcomp(sphere_1000)
 fviz_eig(res.pca)
 
 #Get dimension from Correlation Dimension Estimator ####
