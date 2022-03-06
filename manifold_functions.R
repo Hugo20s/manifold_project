@@ -5,15 +5,19 @@
 library(Rtsne)
 library(lle)
 library(KRLS)
+library(factoextra)
+library(Rdimtools)
 
 options(rgl.printRglwidget = TRUE)
+
+#--------------------------- SIMULATED DATAS -------------------
 
 generateSwissRoll <- function(n) {
   #inspired by sklearn.datasets.make_swiss_roll function
   t <- 0.75 * pi * (3 * runif(n))
-  x <- temp * cos(t)
+  x <- t  * cos(t)
   y <- 21 * runif(n)
-  z <- temp * sin(t) * sample(c(-1, 1), 1)
+  z <- t  * sin(t) * sample(c(-1, 1), 1)
   
   swissroll <- cbind(x, y, z)
   
@@ -23,7 +27,7 @@ generateSwissRoll <- function(n) {
   
   swissroll <- swissroll + noise
   
-  return(list(swisroll = swissroll, t = temp))
+  return(list(swisroll = swissroll, t = t ))
   
 }
 
@@ -90,7 +94,7 @@ generateSphere <- function(n, r, surface_only = TRUE){
   return(cbind(x, y, z))
 }
 
-generateintraSphere <- function(n) {
+generateintraSphere <- function(n, generateSphere) {
   #copy paste from course
   require(pdist)
   
@@ -111,76 +115,67 @@ generateintraSphere <- function(n) {
 }
 
 
-
-data <- generateSwissRoll(1000)
-swisroll_1000 <- data$swissroll
-t <- data$t 
-X <- genrateBolloreoRing(300)
-sphere_1000 <- generateSphere(1000, 10)
-anneaux_1000 <- generateAnneaux(1000)
-
-plot3d(swissroll[order(t), ], col = rainbow(n), size = 10)
-plot3d(X$data, col = X$color)
-plot3d(sphere_1000)
-plot3d(anneaux_1000)
-
 #--------------------------- LLE -------------------
 
-s <- 2
-best_k <- calc_k(anneaux_1000, s, kmin=1, kmax=5, plotres=TRUE,  parallel=TRUE, cpus=4, iLLE=FALSE)
-a <- which.min(unlist(best_k[2]))
-lle_res <- lle(sphere_1000, s, k = 20)
-plot(lle_res$Y)
-
+reduce_dimesion_lle <- function(data, s){
+  all_k <- calc_k(data, s, kmin=1, kmax=30, plotres=TRUE,  parallel=TRUE, cpus=4, iLLE=FALSE)
+  best_k <- which.min(unlist(all_k[2]))
+  lle_res <- lle(data, s, k = best_k)
+  return(lle_res)
+}
 
 #--------------------------- PCA KERNEL -------------------
 
 
-pca_kernel <- function(X, s, sigma){
+reduce_dimension_pca_kernel <- function(X, s, sigma){
   A <- gausskernel(X , sigma = sigma)
   A <- -0.5*(A  - rowMeans(A) - colMeans(A) + mean(A))
   decomposition <- svd(A/nrow(A))
   
   vector <- decomposition$u[1:s,] / sqrt(decomposition$d[1:s])
-  return(A%*%t(vector))
+  result <- A%*%t(vector)
+  
+  return(result)
 }
 
-pca_res <- pca_kernel(sphere_1000, s , 1000)
-plot(pca_res)
 
 #--------------------------- TSNE -------------------
-
-tsne <- Rtsne(sphere_1000, dims = s, perplexity=30, verbose=TRUE, max_iter = 500)
-plot(tsne$Y, t='n', main="tsne")
-
+reduce_dimension_tsne <- function(data, s){
+  tsne <- Rtsne(data, dims = s, perplexity=30, verbose=FALSE, max_iter = 1000)
+  return (tsne)
+}
 
 #--------------------------- GET DIMENSION -------------------
 
 
 #Get dimension from PCA
-res.pca <- prcomp(sphere_1000)
-fviz_eig(res.pca)
+get_dimension_pca <- function(data, plot=TRUE){
+  res.pca <- prcomp(data)
+  
+  eig.val <- get_eigenvalue(res.pca)
+  percentage <- eig.val$cumulative.variance.percent
+  
+  #get the number of components that represent more than 70 % of the variance
+  number_dimension <- min(which(percentage > 70))
+  
+  if (plot){
+    plot(res.pca)
+  }
+  return(number_dimension)
+  
+}
 
 #Get dimension from Correlation Dimension Estimator ####
-corrDim <- function(data, epsilon = 10^seq(-2, 1, lengtsssh.out = 100)){
-  matrix_distance <- dist(data)
-  proportion <- numeric(length(epsilon))
-  for (i in seq(epsilon)){
-    proportion[i] <- mean(matrix_distance <= epsilon[i])
-    
-  }
-  return (list(epsilon = epsilon, proportion = proportion ))
+
+get_dimension_correlation_estimator <- function(data, plot=TRUE){
+  #estimate_correlation
+  result <- est.correlation(data, method = "cut")
+  if (plot){
+    plot(log(result$r), log(result$Cr), main="Correlation Estimator Plot")}
+  
+  return(round(result$estdim))
 }
 
-derivate <- function(x, y) {
-  ll     <- length(y)
-  deltax <- x[2] - x[1] # assumes equally spaced grid
-  deltaf <- y[3:ll] - y[1:(ll - 2)]
-  return(c(NA, deltaf / 2 / deltax, NA))
-}
 
-Xdim <- corrDim(res100)
 
-plot(log10(Xdim$epsilon), derivate(log10(Xdim$epsilon), log10(Xdim$proportion)), 
-     type = 'l')
-
+  
