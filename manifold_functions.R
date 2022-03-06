@@ -27,7 +27,7 @@ generateSwissRoll <- function(n) {
   
   swissroll <- swissroll + noise
   
-  return(list(swisroll = swissroll, t = t ))
+  return(list(swissroll = swissroll, t = t ))
   
 }
 
