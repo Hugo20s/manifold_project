@@ -4,8 +4,8 @@ library(microbenchmark)
 #Put the dimension 10 as a parameters
 
 library(dreval)
-
-
+library(rgl)
+options(rgl.printRglwidget = TRUE)
 #----------- Estimation ----------- #
 sphere_1000 <- generateSphere(1000, 10)
 anneaux_1000 <- generateAnneaux(1000)
@@ -67,3 +67,24 @@ plot3d(swissroll[order(t), ], col = rainbow(n), size = 10)
 plot3d(X$data, col = X$color)
 plot3d(sphere_1000)
 plot3d(anneaux_1000)
+
+
+#------------------ Real Data ---------------
+
+data <- read.csv("rituximab.csv")
+#take out values with target -1 
+data_new <- data[data$Gate != -1, ]
+X <- data_new[,1:7]
+y <- data_new[,9]
+
+get_dimension_pca(X)
+get_dimension_correlation_estimator(X)
+
+tsne <- Rtsne(X, dims = 2, perplexity=30, verbose=FALSE, max_iter = 1000)
+plot(tsne$Y, col= y)
+
+
+
+
+
+
