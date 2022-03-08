@@ -2,7 +2,7 @@
 library(microbenchmark)
 #Swissroll not working 
 #Put the dimension 10 as a parameters
-
+library(intrinsicDimension)
 library(dreval)
 library(rgl)
 options(rgl.printRglwidget = TRUE)
@@ -22,6 +22,8 @@ lle_res <- reduce_dimesion_lle(data, s)
 plot(lle_res$Y)
 tsne_res <- reduce_dimension_tsne(data, s)
 plot(tsne_res$Y)
+
+
 
 #------------- 
 #Experiment 1 (highest number of points)
@@ -83,7 +85,7 @@ get_dimension_correlation_estimator(X)
 tsne <- Rtsne(X, dims = 2, perplexity=30, verbose=FALSE, max_iter = 1000)
 plot(tsne$Y, col= y)
 
-
+pcaLocalDimEst(X, 'FO', alphaFO = .05, verbose = TRUE)
 
 
 

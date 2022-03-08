@@ -127,6 +127,7 @@ reduce_dimesion_lle <- function(data, s){
 #--------------------------- PCA KERNEL -------------------
 
 
+
 reduce_dimension_pca_kernel <- function(X, s, sigma){
   A <- gausskernel(X , sigma = sigma)
   A <- -0.5*(A  - rowMeans(A) - colMeans(A) + mean(A))
