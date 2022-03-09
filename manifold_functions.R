@@ -7,6 +7,8 @@ library(lle)
 library(KRLS)
 library(factoextra)
 library(Rdimtools)
+library(stats)
+library(vegan)
 
 options(rgl.printRglwidget = TRUE)
 
@@ -84,7 +86,7 @@ generateSphere <- function(n, r, surface_only = TRUE){
   phi <- runif(n, 0 , pi)
   
   if (surface_only == FALSE) {
-    radius <- r * runif(n, 0.0, 1.0)^(1.0/3.0)
+    r <- r * runif(n, 0.0, 1.0)^(1.0/3.0)
   }
   
   x <- r*cos(teta) * sin(phi)
@@ -116,17 +118,15 @@ generateintraSphere <- function(n, generateSphere) {
 
 
 #--------------------------- LLE -------------------
-
-reduce_dimesion_lle <- function(data, s){
-  all_k <- calc_k(data, s, kmin=1, kmax=30, plotres=TRUE,  parallel=TRUE, cpus=4, iLLE=FALSE)
-  best_k <- which.min(unlist(all_k[2]))
+#Tuning variables: 
+#k - number of neighboords
+#reg: regularization method
+reduce_dimesion_lle <- function(data, s, best_k){
   lle_res <- lle(data, s, k = best_k)
   return(lle_res)
 }
 
 #--------------------------- PCA KERNEL -------------------
-
-
 
 reduce_dimension_pca_kernel <- function(X, s, sigma){
   A <- gausskernel(X , sigma = sigma)
@@ -139,6 +139,22 @@ reduce_dimension_pca_kernel <- function(X, s, sigma){
   return(result)
 }
 
+#--------------------------- MDS -------------------
+#Tuning variables: 
+#k - number of neighboords
+reduce_dimension_mds <- function(data, s){
+  dist_data <- dist(data)
+  mds <- cmdscale(dist_data, s, add = TRUE)
+  return(mds)
+}
+#--------------------------- IsoMap -------------------
+#Tuning variables: 
+#k - number of neighboords
+reduce_dimension_isomap <- function(data, s, n_neighboords){
+  dist_data <- dist(data)
+  iso <- isomap(dist_data, ndim=s, k= n_neighboords)
+  return(iso)
+}
 
 #--------------------------- TSNE -------------------
 reduce_dimension_tsne <- function(data, s){
@@ -156,8 +172,8 @@ get_dimension_pca <- function(data, plot=TRUE){
   eig.val <- get_eigenvalue(res.pca)
   percentage <- eig.val$cumulative.variance.percent
   
-  #get the number of components that represent more than 70 % of the variance
-  number_dimension <- min(which(percentage > 70))
+  #get the number of components that represent more than 90 % of the variance
+  number_dimension <- min(which(percentage > 80))
   
   if (plot){
     plot(res.pca)
