@@ -33,26 +33,27 @@ iso_res <-reduce_dimension_isomap(data_swissroll, s, k)
 
 # ----------- Comparing all the methods ------------ #
 attach(mtcars)
-par(mfrow=c(3,2))
-plot(lle_res$Y[order(t), ], col = rainbow(length(t)) , main = "LLE")
-plot(tsne_res$Y[order(t), ], col = rainbow(length(t)) , main = "TNSE")
-plot(mds_res$points[order(t), ], col = rainbow(length(t)) , main = "MDS")
+par(mfrow=c(2,2))
+plot(lle_res$Y[order(t), ], col = rainbow(length(t)) , main = "LLE", xlab="Dim1", ylab="Dim2")
+plot(tsne_res$Y[order(t), ], col = rainbow(length(t)) , main = "TSNE", xlab="Dim1", ylab="Dim2")
+plot(mds_res$points[order(t), ], col = rainbow(length(t)) , main = "MDS", xlab="Dim1", ylab="Dim2")
 plot(iso_res$points[order(t), ], col = rainbow(length(t)) ,main = "Isomap")
+par(mfrow=c(1,1))
 
 #------------ Tuning Isomap ------------- 
 #Starting with 4 -> because that is when data stops being fragmented
 attach(mtcars)
-par(mfrow=c(3,3))
-n_neigboords <- c(4,6,8,10,12,14,16,18,20)
+par(mfrow=c(3,2))
+n_neigboords <- c(6,8,10,12,14,16)
 for (k in n_neigboords){
   iso_res <-reduce_dimension_isomap(data_swissroll, s, k)
-  plot(iso_res$points[order(t), ], col = rainbow(length(t)) , main = paste(c("K =", k),sep="" ))
+  plot(iso_res$points[order(t), ], col = rainbow(length(t)) , main = paste(c("K", k), collapse=" = "))
 }
-mtext("Isomap", side = 3, line = -2, outer = TRUE)  
+mtext("Isomap", side = 3, line = 0, outer = TRUE)  
 par(mfrow=c(1,1))
 
 #------------- 
-####### Experiment 2: Esfere in high-dimensional 10-d space
+####### Experiment 2: Sphere in high-dimensional 10-d space
 #Goal: Find the righ intrisic dimension for this volume
 #------------- 
 
@@ -82,13 +83,13 @@ iso_res <-reduce_dimension_isomap(intraSphere, s, k)
 # ----------- Comparing all the methods ------------ #
 
 mat<-matrix(c(4,3, 2, 1),2,2,byrow = TRUE)
-height< rep.int(1, nrow(mat))
+height<- rep.int(1, nrow(mat))
 width<-rep.int(1, ncol(mat))
 layout3d(mat, heights = height, widths=width, sharedMouse = TRUE)
-plot3d(lle_res$Y , main = "LLE")
-plot3d(tsne_res$Y , main = "TNSE")
-plot3d(mds_res$points , main = "MDS")
-plot3d(iso_res$points ,main = "Isomap")
+plot3d(lle_res$Y , main = "LLE", xlab="Dim1", ylab="Dim2", zlab="Dim3")
+plot3d(tsne_res$Y , main = "TSNE", xlab="Dim1", ylab="Dim2", zlab="Dim3")
+plot3d(mds_res$points , main = "MDS", xlab="Dim1", ylab="Dim2", zlab="Dim3")
+plot3d(iso_res$points ,main = "Isomap", xlab="Dim1", ylab="Dim2", zlab="Dim3")
 
 #------------- 
 ####### Experiment 3: Rings from 3-D to 2-D
