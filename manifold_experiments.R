@@ -96,8 +96,22 @@ plot3d(iso_res$points ,main = "Isomap", xlab="Dim1", ylab="Dim2", zlab="Dim3")
 #Goal: Separate the outer ring from the inner ring 
 #------------- 
 
+rings <- genrateBolloreoRing(1000)
 
+bolring <- rings$data
+plot3d(bolring, col = rings$color)
+s <- 2
+k <- 0.01
+#all_k <- calc_k(bolring, s, kmin=1, kmax=30, plotres=TRUE,  parallel=TRUE, cpus=4, iLLE=FALSE)
+#best_k <- which.min(unlist(all_k[2]))
+lle_res <- reduce_dimesion_lle(bolring, s, best_k)
+tsne_res <- reduce_dimension_tsne(bolring, s, 50, 1000)
+mds_res <-reduce_dimension_mds(bolring, s)
+iso_res <-reduce_dimension_isomap(bolring, s, k)
 
-
-
-
+par(mfrow=c(2,2))
+#plot(lle_res$Y[order(t), ], col = rainbow(length(t)) , main = "LLE", xlab="Dim1", ylab="Dim2")
+plot(tsne_res$Y, col = rings$color, main = "TSNE", xlab="Dim1", ylab="Dim2")
+plot(mds_res$points, col = rings$color , main = "MDS", xlab="Dim1", ylab="Dim2")
+plot(iso_res$points, col = rings$color ,main = "Isomap")
+par(mfrow=c(1,1))
