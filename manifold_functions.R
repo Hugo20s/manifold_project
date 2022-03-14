@@ -172,7 +172,7 @@ get_dimension_pca <- function(data, plot=TRUE){
   eig.val <- get_eigenvalue(res.pca)
   percentage <- eig.val$cumulative.variance.percent
   
-  #get the number of components that represent more than 90 % of the variance
+  #get the number of components that represent more than 80 % of the variance
   number_dimension <- min(which(percentage > 80))
   
   if (plot){
