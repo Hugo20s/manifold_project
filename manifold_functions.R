@@ -157,8 +157,8 @@ reduce_dimension_isomap <- function(data, s, n_neighboords){
 }
 
 #--------------------------- TSNE -------------------
-reduce_dimension_tsne <- function(data, s){
-  tsne <- Rtsne(data, dims = s, perplexity=30, verbose=FALSE, max_iter = 1000)
+reduce_dimension_tsne <- function(data, s, p=30, i = 1000){
+  tsne <- Rtsne(data, dims = s, perplexity = p, verbose=FALSE, max_iter = i)
   return (tsne)
 }
 
