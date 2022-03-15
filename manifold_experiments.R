@@ -1,8 +1,7 @@
 
 #Swissroll not working 
 #Put the dimension 10 as a parameters
-library(intrinsicDimension)
-library(dreval)
+
 library(rgl)
 options(rgl.printRglwidget = TRUE)
 
@@ -24,20 +23,18 @@ plot3d(data_swissroll[order(t), ], col = rainbow(length(t)), size = 10)
 
 s <- 2
 k <- 10
-all_k <- calc_k(data_swissroll, s, kmin=1, kmax=30, plotres=TRUE,  parallel=TRUE, cpus=4, iLLE=FALSE)
-best_k <- which.min(unlist(all_k[2]))
-lle_res <- reduce_dimesion_lle(data_swissroll, s, best_k)
 tsne_res <- reduce_dimension_tsne(data_swissroll, s)
 mds_res <-reduce_dimension_mds(data_swissroll, s)
 iso_res <-reduce_dimension_isomap(data_swissroll, s, k)
 
 # ----------- Comparing all the methods ------------ #
 attach(mtcars)
-par(mfrow=c(2,2))
-plot(lle_res$Y[order(t), ], col = rainbow(length(t)) , main = "LLE", xlab="Dim1", ylab="Dim2")
-plot(tsne_res$Y[order(t), ], col = rainbow(length(t)) , main = "TSNE", xlab="Dim1", ylab="Dim2")
+#par(mfrow=c(1,3))
+layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
+
 plot(mds_res$points[order(t), ], col = rainbow(length(t)) , main = "MDS", xlab="Dim1", ylab="Dim2")
 plot(iso_res$points[order(t), ], col = rainbow(length(t)) ,main = "Isomap")
+plot(tsne_res$Y[order(t), ], col = rainbow(length(t)) , main = "t-SNE", xlab="Dim1", ylab="Dim2")
 par(mfrow=c(1,1))
 
 #------------ Tuning Isomap ------------- 
@@ -72,9 +69,6 @@ if (s_pca == s_cor){
 
 #apply dimensionality reduction 
 
-all_k <- calc_k(intraSphere, s, kmin=1, kmax=30, plotres=TRUE,  parallel=TRUE, cpus=4, iLLE=FALSE)
-best_k <- which.min(unlist(all_k[2]))
-lle_res <- reduce_dimesion_lle(intraSphere, s, best_k)
 tsne_res <- reduce_dimension_tsne(intraSphere, s)
 mds_res <-reduce_dimension_mds(intraSphere, s)
 k <- 10
@@ -82,12 +76,11 @@ iso_res <-reduce_dimension_isomap(intraSphere, s, k)
 
 # ----------- Comparing all the methods ------------ #
 
-mat<-matrix(c(4,3, 2, 1),2,2,byrow = TRUE)
+mat<-matrix(c(1,1,2,3), 2, 2, byrow = TRUE)
 height<- rep.int(1, nrow(mat))
 width<-rep.int(1, ncol(mat))
 layout3d(mat, heights = height, widths=width, sharedMouse = TRUE)
-plot3d(lle_res$Y , main = "LLE", xlab="Dim1", ylab="Dim2", zlab="Dim3")
-plot3d(tsne_res$Y , main = "TSNE", xlab="Dim1", ylab="Dim2", zlab="Dim3")
+plot3d(tsne_res$Y , main = "t-SNE", xlab="Dim1", ylab="Dim2", zlab="Dim3")
 plot3d(mds_res$points , main = "MDS", xlab="Dim1", ylab="Dim2", zlab="Dim3")
 plot3d(iso_res$points ,main = "Isomap", xlab="Dim1", ylab="Dim2", zlab="Dim3")
 
@@ -101,17 +94,14 @@ rings <- genrateBolloreoRing(1000)
 bolring <- rings$data
 plot3d(bolring, col = rings$color)
 s <- 2
-k <- 0.01
-#all_k <- calc_k(bolring, s, kmin=1, kmax=30, plotres=TRUE,  parallel=TRUE, cpus=4, iLLE=FALSE)
-#best_k <- which.min(unlist(all_k[2]))
-lle_res <- reduce_dimesion_lle(bolring, s, best_k)
+
 tsne_res <- reduce_dimension_tsne(bolring, s, 50, 1000)
 mds_res <-reduce_dimension_mds(bolring, s)
-iso_res <-reduce_dimension_isomap(bolring, s, k)
+iso_res <-reduce_dimension_isomap(bolring, s, 110)
 
-par(mfrow=c(2,2))
-#plot(lle_res$Y[order(t), ], col = rainbow(length(t)) , main = "LLE", xlab="Dim1", ylab="Dim2")
-plot(tsne_res$Y, col = rings$color, main = "TSNE", xlab="Dim1", ylab="Dim2")
+attach(mtcars)
+layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
+plot(tsne_res$Y, col = rings$color, main = "t-SNE", xlab="Dim1", ylab="Dim2")
 plot(mds_res$points, col = rings$color , main = "MDS", xlab="Dim1", ylab="Dim2")
 plot(iso_res$points, col = rings$color ,main = "Isomap")
 par(mfrow=c(1,1))

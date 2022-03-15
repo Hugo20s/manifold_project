@@ -1,16 +1,9 @@
-#install.packages('lle')
-#install.packages("Rtsne")
-#install.packages('KRLS')
 
 library(Rtsne)
-library(lle)
-library(KRLS)
 library(factoextra)
 library(Rdimtools)
 library(stats)
 library(vegan)
-
-options(rgl.printRglwidget = TRUE)
 
 #--------------------------- SIMULATED DATAS -------------------
 
@@ -117,27 +110,6 @@ generateintraSphere <- function(n, generateSphere) {
 }
 
 
-#--------------------------- LLE -------------------
-#Tuning variables: 
-#k - number of neighboords
-#reg: regularization method
-reduce_dimesion_lle <- function(data, s, best_k){
-  lle_res <- lle(data, s, k = best_k)
-  return(lle_res)
-}
-
-#--------------------------- PCA KERNEL -------------------
-
-reduce_dimension_pca_kernel <- function(X, s, sigma){
-  A <- gausskernel(X , sigma = sigma)
-  A <- -0.5*(A  - rowMeans(A) - colMeans(A) + mean(A))
-  decomposition <- svd(A/nrow(A))
-  
-  vector <- decomposition$u[1:s,] / sqrt(decomposition$d[1:s])
-  result <- A%*%t(vector)
-  
-  return(result)
-}
 
 #--------------------------- MDS -------------------
 #Tuning variables: 
@@ -158,7 +130,7 @@ reduce_dimension_isomap <- function(data, s, n_neighboords){
 
 #--------------------------- TSNE -------------------
 reduce_dimension_tsne <- function(data, s, p=30, i = 1000){
-  tsne <- Rtsne(data, dims = s, perplexity = p, verbose=FALSE, max_iter = i)
+  tsne <- Rtsne(data, dims = s, perplexity = p, verbose=FALSE, max_iter = i, check_duplicates = FALSE)
   return (tsne)
 }
 
