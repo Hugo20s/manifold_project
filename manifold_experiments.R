@@ -95,9 +95,9 @@ bolring <- rings$data
 plot3d(bolring, col = rings$color)
 s <- 2
 
-tsne_res <- reduce_dimension_tsne(bolring, s, 50, 1000)
+tsne_res <- reduce_dimension_tsne(bolring, s, 100, 100)
 mds_res <-reduce_dimension_mds(bolring, s)
-iso_res <-reduce_dimension_isomap(bolring, s, 110)
+iso_res <-reduce_dimension_isomap(bolring, s, 200)
 
 attach(mtcars)
 layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
@@ -105,3 +105,17 @@ plot(tsne_res$Y, col = rings$color, main = "t-SNE", xlab="Dim1", ylab="Dim2")
 plot(mds_res$points, col = rings$color , main = "MDS", xlab="Dim1", ylab="Dim2")
 plot(iso_res$points, col = rings$color ,main = "Isomap")
 par(mfrow=c(1,1))
+
+
+tsne_res1 <- reduce_dimension_tsne(bolring, s, 50, 100)
+tsne_res2 <- reduce_dimension_tsne(bolring, s, 50, 500)
+tsne_res3 <- reduce_dimension_tsne(bolring, s, 100, 100)
+tsne_res4 <- reduce_dimension_tsne(bolring, s, 100, 500)
+
+attach(mtcars)
+par(mfrow=c(1,2))
+plot(tsne_res1$Y, col = rings$color, main = "t-SNE 50 100", xlab="Dim1", ylab="Dim2")
+plot(tsne_res2$Y, col = rings$color, main = "t-SNE 50 500", xlab="Dim1", ylab="Dim2")
+plot(tsne_res3$Y, col = rings$color, main = "t-SNE 100 100")
+plot(tsne_res4$Y, col = rings$color, main = "t-SNE 100 500")
+
