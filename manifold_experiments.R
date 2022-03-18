@@ -58,7 +58,7 @@ intraSphere <- generateintraSphere(1000, generateSphere)
 
 #get intrisic dimension
 
-s_pca <- get_dimension_pca(intraSphere, TRUE)
+s_pca <- get_dimension_pca(intraSphere, FALSE)
 print(paste("Intrisic Dimension EStimation by PCA : ", s_pca))
 s_cor <- get_dimension_correlation_estimator(intraSphere, TRUE)
 print(paste("Intrisic Dimension EStimation by Correlation Estimator: ", s_cor))

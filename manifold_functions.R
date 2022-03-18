@@ -144,6 +144,11 @@ get_dimension_pca <- function(data, plot=TRUE){
   eig.val <- get_eigenvalue(res.pca)
   percentage <- eig.val$cumulative.variance.percent
   
+  plot(percentage, xlab = "Number of Principal Components",
+       ylab = expression(atop("Culmulative Proportion",
+                              "of Variance")),
+       type = "b")
+  
   #get the number of components that represent more than 80 % of the variance
   number_dimension <- min(which(percentage > 80))
   
@@ -160,7 +165,10 @@ get_dimension_correlation_estimator <- function(data, plot=TRUE){
   #estimate_correlation
   result <- est.correlation(data, method = "cut")
   if (plot){
-    plot(log(result$r), log(result$Cr), main="Correlation Estimator Plot")}
+    plot(log10(result$r), log10(result$Cr), 
+         type = 'l', main="Correlation Estimator Plot")
+    
+    }
   
   return(round(result$estdim))
 }
