@@ -23,7 +23,7 @@ Exemples:
     according to your need. 
 
 Credits: 
-This work was made by Lia Furtado and Hugo Vinsion
+This work was made by Lia Furtado and Hugo Vinson
 
 Useful links:
 https://www.overleaf.com/7813432593nbmfvxfjkyhj
